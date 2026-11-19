@@ -1,0 +1,160 @@
+#include <stdio.h>
+#include <stdlib.h>
+typedef struct {
+    char hoten[30];
+    int masv;
+    float d1, d2, d3;
+} Data;
+
+typedef struct tagNode {
+    Data infor;
+    struct tagNode *link;
+} Node;
+
+typedef struct {
+    Node *pHead;
+    Node *pTail;
+    int spt;
+} LList;
+void initList(LList *L) {
+    L->pHead = NULL;
+    L->pTail = NULL;
+    L->spt = 0;
+}
+int emptyList(LList L) {
+    return (L.spt == 0);
+}
+Node* createNode(Data x) {
+    Node *pp = (Node*)malloc(sizeof(Node));
+    if (pp == NULL) {
+        printf("Loi cap phat bo nho!\n");
+        return NULL;
+    }
+    pp->infor = x;
+    pp->link = NULL;
+    return pp;
+}
+void insert_Head(LList *L, Data x) {
+    Node *pp = createNode(x);
+    if (pp == NULL) return;
+    if (emptyList(*L)) {
+        L->pHead = pp;
+        L->pTail = pp;
+    } else {
+        pp->link = L->pHead;
+        L->pHead = pp;
+    }
+    L->spt++;
+}
+void insert_Tail(LList *L, Data x) {
+    Node *pp = createNode(x);
+    if (pp == NULL) return;
+    if (emptyList(*L)) {
+        L->pHead = pp;
+        L->pTail = pp;
+    } else {
+        L->pTail->link = pp;
+        L->pTail = pp;
+    }
+    L->spt++;
+}
+Node* searchNode(LList L, int maTim) {
+    Node *q = L.pHead;
+    while (q != NULL && q->infor.masv != maTim) {
+        q = q->link;
+    }
+    return q;
+}
+void insert_After(LList *L, Node *q, Data x) {
+    if (q == NULL) return;
+    Node *pp = createNode(x);
+    if (pp == NULL) return;
+    pp->link = q->link;
+    q->link = pp;
+    if (q == L->pTail) {
+        L->pTail = pp;
+    }
+    L->spt++;
+}
+void nhap(Data *x) {
+    printf("Nhap ma sv: ");
+    scanf("%d", &(x->masv));
+    if (x->masv > 0) {
+        printf("Nhap ten sv: ");
+        scanf(" %29[^\n]", x->hoten);
+        printf("Nhap diem 1, 2, 3: ");
+        scanf("%f %f %f", &(x->d1), &(x->d2), &(x->d3));
+    }
+}
+void in(Data x) {
+    printf("Ten: %-20s | Ma: %-6d | Diem: %.2f - %.2f - %.2f\n",
+           x.hoten, x.masv, x.d1, x.d2, x.d3);
+}
+void processList(LList L) {
+    if (emptyList(L)) {
+        printf("Danh sach rong!\n");
+        return;
+    }
+    Node *pp = L.pHead;
+    while (pp != NULL) {
+        in(pp->infor);
+        pp = pp->link;
+    }
+}
+void freeList(LList *L) {
+    Node *pp;
+    while (L->pHead != NULL) {
+        pp = L->pHead;
+        L->pHead = L->pHead->link;
+        free(pp);
+    }
+    L->pTail = NULL;
+    L->spt = 0;
+}
+int main() {
+    LList L;
+    int kt = 0, chon, maTim;
+    Data x;
+    initList(&L);
+    do {
+        printf("\n1: Them dau\n");
+        printf("2: Them cuoi\n");
+        printf("3: Them sau 1 nut\n");
+        printf("9: Duyet ds\n");
+        printf("0: Thoat\n");
+        printf("Chon: ");
+        scanf("%d", &chon);
+        switch (chon) {
+            case 1:
+                nhap(&x);
+                if (x.masv > 0) insert_Head(&L, x);
+                break;
+            case 2:
+                nhap(&x);
+                if (x.masv > 0) insert_Tail(&L, x);
+                break;
+            case 3: {
+                printf("Nhap ma sv dung truoc: ");
+                scanf("%d", &maTim);
+                Node *q = searchNode(L, maTim);
+                if (q == NULL) {
+                    printf("Khong tim thay ma sv!\n");
+                } else {
+                    nhap(&x);
+                    if (x.masv > 0) insert_After(&L, q, x);
+                }
+                break;
+            }
+            case 9:
+                processList(L);
+                break;
+            case 0:
+                freeList(&L);
+                kt = 1;
+                break;
+            default:
+                printf("Lua chon khong hop le!\n");
+        }
+    } while (kt == 0);
+    return 0;
+}
